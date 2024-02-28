@@ -1,9 +1,19 @@
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Home, SignIn, SignUp, About, Profile } from "./pages/index";
+import { Header } from "./components/index";
 function App() {
   return (
-    <>
-     <div className="bg-emerald-500">hello Yan</div>
-    </>
-  )
+    <BrowserRouter>
+      <Header />
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/sign-in" element={<SignIn />} />
+        <Route path="/sing-up" element={<SignUp />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/profile" element={<Profile />} />
+      </Routes>
+    </BrowserRouter>
+  );
 }
 
-export default App
+export default App;
