@@ -5,11 +5,16 @@ export default function SignUp() {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.id]: e.target.value });
+    setFormData({ ...formData, [e.target.id]: e.target.value.trim() });
   };
   const navigate = useNavigate();
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!formData.username || !formData.email || !formData.password) {
+      setError('Please, provide all required fields!');
+      return;
+    }
+
     try {
       setLoading(true);
       const res = await fetch("/api/auth/signup", {
@@ -19,8 +24,8 @@ export default function SignUp() {
       });
       const data = await res.json();
       if (data.success === false) {
-        setError(data.message);
         setLoading(false);
+        setError(data.message);
         return;
       }
       setLoading(false);
@@ -28,8 +33,8 @@ export default function SignUp() {
       navigate('/sign-in');
       console.log(data);
     } catch (error) {
-      setError(error.message);
       setLoading(false);
+      setError(error.message);
     }
   };
   return (

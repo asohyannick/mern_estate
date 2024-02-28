@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -6,34 +6,39 @@ import {
   signInSuccess,
   signInFailure,
 } from "../redux/user/userSlice";
+
 export default function SignIn() {
-  const [formData, setFormData] = useState({});
-  const {error, loading} = useSelector((state) => state.user);
+  const [formData, setFormData] = React.useState({});
+  const { error, loading } = useSelector((state) => state.user);
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.id]: e.target.value });
+    setFormData({ ...formData, [e.target.id]: e.target.value.trim() });
   };
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!formData.email || !formData.password) {
+      dispatch(signInFailure("Please provide all required fields!"));
+      return;
+    }
     try {
-      dispatch(signInStart())
+      dispatch(signInStart());
       const res = await fetch("/api/auth/signin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
       const data = await res.json();
-      if (data.success === false) {
-        dispatch(signInFailure(data.message))
-        return;
+      if (!res.ok) {
+        throw new Error(data.message);
       }
-      dispatch(signInSuccess(data))
+      dispatch(signInSuccess(data));
       navigate("/");
     } catch (error) {
-     dispatch(signInFailure(error.message));
+      dispatch(signInFailure(error.message));
     }
   };
+
   return (
     <div className="p-3 max-w-lg mx-auto">
       <h1 className="text-3xl text-center font-semibold my-7">Sign In</h1>
@@ -60,7 +65,7 @@ export default function SignIn() {
         </button>
       </form>
       <div className="flex gap-2 mt-5">
-        <p>Dont have an account?</p>
+        <p>Don't have an account?</p>
         <Link to={"/sign-up"}>
           <span className="text-blue-700">Sign Up</span>
         </Link>
