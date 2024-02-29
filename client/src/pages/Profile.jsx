@@ -14,7 +14,10 @@ import {
   updateUserFailure,
   deleteUserStart,
   deleteUserSuccess,
-  deleteUserFailure
+  deleteUserFailure,
+  signOutUserFailure,
+  signOutUserStart,
+  signOutUserSuccess,
 } from "../redux/user/userSlice";
 import { app } from "../firebase";
 export default function Profile() {
@@ -83,19 +86,36 @@ export default function Profile() {
   const handleDeleteUser = async (e) => {
     setOpenModal(false);
     try {
-        dispatch(deleteUserStart());
-        const res = await fetch(`/api/user/delete/${currentUser._id}`, {
-          method:'DELETE',
-        });
-        const data = await res.json();
-        if(data.success === false) {
-          dispatch(deleteUserFailure(data.message));
-          return;
-        } else {
-          dispatch(deleteUserSuccess(data));
-        }
-    } catch(error) {
+      dispatch(deleteUserStart());
+      const res = await fetch(`/api/user/delete/${currentUser._id}`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+      if (data.success === false) {
+        dispatch(deleteUserFailure(data.message));
+        return;
+      } else {
+        dispatch(deleteUserSuccess(data));
+      }
+    } catch (error) {
       dispatch(deleteUserFailure(error.message));
+    }
+  };
+  const handleSignOut = async () => {
+    try {
+      dispatch(signOutUserStart());
+      const res = await fetch("/api/auth/signout", {
+        method: "DELETE",
+      });
+      const data = await res.json();
+      if (data.success === false) {
+        dispatch(signOutUserFailure(data.message));
+        return;
+      } else {
+        dispatch(signOutUserSuccess(data));
+      }
+    } catch (error) {
+      dispatch(signOutUserFailure(error.message));
     }
   };
   return (
@@ -165,7 +185,7 @@ export default function Profile() {
       </p>
       <div className="flex justify-between gap-4 mt-4">
         <Button
-        color="failure"
+          color="failure"
           onClick={() => setOpenModal(true)}
           className="bg-red-500 hover:bg-red-600"
         >
@@ -179,14 +199,14 @@ export default function Profile() {
         >
           <Modal.Header />
           <Modal.Body>
-          <HiOutlineExclamationCircle className='h-14 w-14 text-gray-400 dark:text-gray-200 mb-4 mx-auto' />
+            <HiOutlineExclamationCircle className="h-14 w-14 text-gray-400 dark:text-gray-200 mb-4 mx-auto" />
 
             <h1 className="text-center text-2xl">
               Are you sure you want to delete your account?
             </h1>
             <div className="flex justify-between gap-4 mt-5">
               <Button
-              color="failure"
+                color="failure"
                 onClick={handleDeleteUser}
                 className="bg-red-500  text-white hover:bg-red-600"
               >
@@ -198,7 +218,11 @@ export default function Profile() {
             </div>
           </Modal.Body>
         </Modal>
-        <Button color="failure"  className="bg-red-500 hover:bg-red-600 opacity-90 text-2xl">
+        <Button
+          color="failure"
+          onClick={handleSignOut}
+          className="bg-red-500 hover:bg-red-600 opacity-90 text-2xl"
+        >
           Sign Out
         </Button>
       </div>
