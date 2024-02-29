@@ -5,7 +5,9 @@ import cors from "cors";
 import { StatusCodes } from "http-status-codes";
 import cookieParser from "cookie-parser";
 import userRoute from './routes/user.route.js';
-import authRoute from './routes/auth.route.js'
+import authRoute from './routes/auth.route.js';
+import listingRoute from './routes/listing.route.js'
+
 dotenv.config();
 const app = express();
 // security packages
@@ -26,6 +28,8 @@ app.get("/test", function (req, res) {
 // routes
 app.use('/api/user', userRoute);
 app.use('/api/auth', authRoute);
+app.use('/api/listing', listingRoute);
+
 
 app.use((err, req, res, next) => {
   const statusCode = err.statusCode || StatusCodes.INTERNAL_SERVER_ERROR;
