@@ -2,6 +2,7 @@ import React, { useRef, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { Modal, Button } from "flowbite-react";
 import { HiOutlineExclamationCircle } from "react-icons/hi";
+import {Link} from 'react-router-dom';
 import {
   getDownloadURL,
   getStorage,
@@ -178,6 +179,9 @@ export default function Profile() {
         >
           {loading ? "Loading" : "Update"}
         </button>
+        <Link className="bg-green-700 text-white p-3 rounded-lg uppercase text-center hover:opacity-95" to={'/create-listing'}>
+           Create Listing
+        </Link>
       </form>
       <p className="text-red-700">{error ? error : ""}</p>
       <p className="text-green-700 mt-2 text-center">
