@@ -27,9 +27,29 @@ export const updateUser = async (req, res, next) => {
           avatar: req.body.avatar,
         },
       },
-      { new: true });
+      { new: true }
+    );
     const { password, ...rest } = updatedUser._doc;
     res.status(StatusCodes.OK).json(rest);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteUser = async (req, res, next) => {
+  if (req.user.id !== req.params.id) {
+    return next(
+      errorHandler(
+        StatusCodes.UNAUTHORIZED,
+        "You  can delete only your own account"
+      )
+    );
+  }
+  try {
+    await User.findByIdAndDelete(req.params.id);
+    res
+      .status(StatusCodes.OK)
+      .json("User has been deleted")
   } catch (error) {
     next(error);
   }

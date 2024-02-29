@@ -1,5 +1,7 @@
 import React, { useRef, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import { Modal, Button } from "flowbite-react";
+import { HiOutlineExclamationCircle } from "react-icons/hi";
 import {
   getDownloadURL,
   getStorage,
@@ -10,6 +12,9 @@ import {
   updateUserStart,
   updateUserSuccess,
   updateUserFailure,
+  deleteUserStart,
+  deleteUserSuccess,
+  deleteUserFailure
 } from "../redux/user/userSlice";
 import { app } from "../firebase";
 export default function Profile() {
@@ -19,6 +24,8 @@ export default function Profile() {
   const [filePercent, setFilePercent] = useState(0);
   const [fileUploadError, setFileUploadError] = useState(false);
   const [formData, setFormData] = useState({});
+  const [updateSuccess, setUpdateSuccess] = useState(false);
+  const [openModal, setOpenModal] = useState(false);
   const dispatch = useDispatch();
   React.useEffect(() => {
     if (file) {
@@ -59,7 +66,7 @@ export default function Profile() {
       dispatch(updateUserStart());
       const res = await fetch(`/api/user/update/${currentUser._id}`, {
         method: "PUT",
-        headers: { "Content-Type" : "application/json", },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
       const data = await res.json();
@@ -68,8 +75,27 @@ export default function Profile() {
         return;
       }
       dispatch(updateUserSuccess(data));
+      setUpdateSuccess(true);
     } catch (error) {
       dispatch(updateUserFailure(error.message));
+    }
+  };
+  const handleDeleteUser = async (e) => {
+    setOpenModal(false);
+    try {
+        dispatch(deleteUserStart());
+        const res = await fetch(`/api/user/delete/${currentUser._id}`, {
+          method:'DELETE',
+        });
+        const data = await res.json();
+        if(data.success === false) {
+          dispatch(deleteUserFailure(data.message));
+          return;
+        } else {
+          dispatch(deleteUserSuccess(data));
+        }
+    } catch(error) {
+      dispatch(deleteUserFailure(error.message));
     }
   };
   return (
@@ -126,15 +152,56 @@ export default function Profile() {
           onChange={handleChange}
           className="border p-3 rounded-lg"
         />
-        <button disabled={loading}  className="bg-slate-700 uppercase p-3 hover:opacity-95 rounded-lg disabled:opacity-80">
-          {loading  ? 'Loading' : 'Update'}
+        <button
+          disabled={loading}
+          className="bg-slate-700 uppercase p-3 hover:opacity-95 rounded-lg disabled:opacity-80"
+        >
+          {loading ? "Loading" : "Update"}
         </button>
       </form>
-      <div className="flex justify-between mt-5">
-        <span className="text-red-700 cursor-pointer">Delete Account</span>
-        <span className="text-red-700 cursor-pointer">Sign Out</span>
+      <p className="text-red-700">{error ? error : ""}</p>
+      <p className="text-green-700 mt-2 text-center">
+        {setUpdateSuccess ? "User is updated successfully" : ""}
+      </p>
+      <div className="flex justify-between gap-4 mt-4">
+        <Button
+        color="failure"
+          onClick={() => setOpenModal(true)}
+          className="bg-red-500 hover:bg-red-600"
+        >
+          Delete Account
+        </Button>
+        <Modal
+          popup
+          size="md"
+          show={openModal}
+          onClose={() => setOpenModal(false)}
+        >
+          <Modal.Header />
+          <Modal.Body>
+          <HiOutlineExclamationCircle className='h-14 w-14 text-gray-400 dark:text-gray-200 mb-4 mx-auto' />
+
+            <h1 className="text-center text-2xl">
+              Are you sure you want to delete your account?
+            </h1>
+            <div className="flex justify-between gap-4 mt-5">
+              <Button
+              color="failure"
+                onClick={handleDeleteUser}
+                className="bg-red-500  text-white hover:bg-red-600"
+              >
+                Yes, I'm sure.
+              </Button>
+              <Button color="gray" onClick={() => setOpenModal(false)}>
+                No, Cancel.
+              </Button>
+            </div>
+          </Modal.Body>
+        </Modal>
+        <Button color="failure"  className="bg-red-500 hover:bg-red-600 opacity-90 text-2xl">
+          Sign Out
+        </Button>
       </div>
-      <p className="text-red-700">{error ? error : ''}</p>
     </div>
   );
 }
