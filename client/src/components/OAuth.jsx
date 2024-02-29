@@ -6,17 +6,17 @@ import { useNavigate } from "react-router-dom";
 export default function OAuth() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const auth = getAuth(app)
   const handleGoogleClick = async () => {
+    const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({prompt: 'select_account'});
     try {
-      const provider = new GoogleAuthProvider();
-      const auth = getAuth(app);
-
       const result = await signInWithPopup(auth, provider);
 
-      const res = await fetch("/api/auth/google", {
-        method: "POST",
+      const res = await fetch('/api/auth/google', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           name: result.user.displayName,
@@ -24,18 +24,13 @@ export default function OAuth() {
           photo: result.user.photoURL,
         }),
       });
-      if (!res.ok) {
-        throw new Error("Failed to send Google sign-in data to the server");
-      }
       const data = await res.json();
-      dispatch(signInSuccess(data));
-      navigate("/");
-    } catch (error) {
-      if (error.code === "auth/cancelled-popup-request") {
-        console.log("Google sign-in popup was cancelled");
-      } else {
-        console.log("Could not sign in with Google", error);
+      if(res.ok) {
+        dispatch(signInSuccess(data));
+        navigate('/');
       }
+    } catch (error) {
+      console.log(error);
     }
   };
   return (
