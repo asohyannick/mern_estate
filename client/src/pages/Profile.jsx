@@ -22,6 +22,9 @@ import {
   showListingStart,
   showListingSuccess,
   showListingFailure,
+  deleteListingFailure,
+  deleteListingStart,
+  deleteListingSuccess,
 } from "../redux/user/userSlice";
 import { app } from "../firebase";
 export default function Profile() {
@@ -35,7 +38,8 @@ export default function Profile() {
   const [openModal, setOpenModal] = useState(false);
   const [showListingsError, setShowListingsError] = useState(false);
   const [userListings, setUserListings] = useState([]);
-  console.log(userListings);
+  const [showUserDeleteListingError, setShowUserDeleteListingError] =
+    useState(false);
   const dispatch = useDispatch();
   React.useEffect(() => {
     if (file) {
@@ -145,6 +149,30 @@ export default function Profile() {
     } catch (error) {
       dispatch(showListingFailure(error.message));
       setShowListingsError(false);
+    }
+  };
+
+  const handleDeleteListing = async (listingId) => {
+    try {
+      dispatch(deleteListingStart());
+      setShowUserDeleteListingError(false);
+      const res = await fetch(`/api/listing/delete/${listingId}`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+      if (data.success === false) {
+        dispatch(deleteListingFailure(data.message));
+        setShowUserDeleteListingError(false);
+        return;
+      } else {
+        dispatch(deleteListingSuccess(data));
+        setUserListings((prev) =>
+          prev.filter((listing) => listing._id !== listingId)
+        );
+      }
+    } catch (error) {
+      dispatch(deleteListingFailure(error.message));
+      setShowUserDeleteListingError(false);
     }
   };
   return (
@@ -275,30 +303,37 @@ export default function Profile() {
       </div>
       {userListings && userListings.length > 0 && (
         <div className="flex flex-col gap-4">
-          <h1 className="text-center mt-7 text-2xl font-semibold">Your Listings</h1>
+          <h1 className="text-center mt-7 text-2xl font-semibold">
+            Your Listings
+          </h1>
           {userListings.map((listing) => (
-          <div
-            key={listing._id}
-            className="border rounded-lg p-3 flex justify-between items-center gap-4"
-          >
-            <Link to={`/listing/${listing._id}`}>
-              <img
-                src={listing.imageUrls[0]}
-                alt="listing cover"
-                className="h-16 w-16 object-contain"
-              />
-            </Link>
-            <Link
-              to={`/listing/${listing._id}`}
-              className="text-gray-700 font-semibold flex-1 hover:underline truncate"
+            <div
+              key={listing._id}
+              className="border rounded-lg p-3 flex justify-between items-center gap-4"
             >
-              <p>{listing.name}</p>
-            </Link>
-            <div className="flex flex-col items-center">
-              <button className="text-red-700 uppercase">Delete</button>
-              <button className="text-green-700 uppercase">Edit</button>
+              <Link to={`/listing/${listing._id}`}>
+                <img
+                  src={listing.imageUrls[0]}
+                  alt="listing cover"
+                  className="h-16 w-16 object-contain"
+                />
+              </Link>
+              <Link
+                to={`/listing/${listing._id}`}
+                className="text-gray-700 font-semibold flex-1 hover:underline truncate"
+              >
+                <p>{listing.name}</p>
+              </Link>
+              <div className="flex flex-col items-center">
+                <button
+                  className="text-red-700 uppercase"
+                  onClick={() => handleDeleteListing(listing._id)}
+                >
+                  Delete
+                </button>
+                <button className="text-green-700 uppercase">Edit</button>
+              </div>
             </div>
-          </div>
           ))}
         </div>
       )}
