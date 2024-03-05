@@ -1,8 +1,8 @@
 import  express from 'express';
-import { signup, signin, google, signout } from '../controllers/auth.controller.js';
+import auth from '../controllers/auth.controller.js';
 const router = express.Router();
-router.post('/signup', signup);
-router.post('/signin', signin);
-router.post('/google', google);
-router.delete('/signout', signout);
+router.post('/signup', auth.signup);
+router.post('/signin', auth.signin);
+router.post('/google', auth.google);
+router.delete('/signout', auth.signout);
 export default router;

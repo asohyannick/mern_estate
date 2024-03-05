@@ -1,14 +1,17 @@
-import React, { useState } from "react";
+import  { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import OAuth from "../components/OAuth";
 export default function SignUp() {
   const [formData, setFormData] = useState({});
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  const navigate = useNavigate();
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value.trim() });
   };
-  const navigate = useNavigate();
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.username || !formData.email || !formData.password) {
@@ -20,7 +23,7 @@ export default function SignUp() {
       setLoading(true);
       const res = await fetch("/api/auth/signup", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type" : "application/json" },
         body: JSON.stringify(formData),
       });
       const data = await res.json();
@@ -32,7 +35,6 @@ export default function SignUp() {
       setLoading(false);
       setError(null);
       navigate('/sign-in');
-      console.log(data);
     } catch (error) {
       setLoading(false);
       setError(error.message);

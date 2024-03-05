@@ -1,20 +1,20 @@
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
-import SwiperCore from "swiper";
 import { Navigation } from "swiper/modules";
 import "swiper/css/bundle";
+import SwiperCore from "swiper";
 import Contact from "../components/Contact";
-import { useSelector, useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 import {
   FaBath,
   FaBed,
   FaChair,
-  FaMapMarkedAlt,
   FaMapMarkerAlt,
   FaParking,
   FaShare,
 } from "react-icons/fa";
+
 export default function Listing() {
   const [listing, setListing] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -22,10 +22,10 @@ export default function Listing() {
   const [copied, setCopied] = useState(false);
   const [contact, setContact] = useState(false);
   const params = useParams();
-  const dispatch = useDispatch();
   const { currentUser } = useSelector((state) => state.user);
   SwiperCore.use([Navigation]);
-  React.useEffect(() => {
+
+  useEffect(() => {
     const fetchListing = async () => {
       try {
         setLoading(true);
@@ -47,13 +47,15 @@ export default function Listing() {
     };
     fetchListing();
   }, [params.listingId]);
+
   return (
     <main>
       {loading && <p className="text-center my-7 text-2xl">Loading...</p>}
       {error && (
         <p className="text-center my-7 text-2xl">Something went wrong!</p>
       )}
-      {listing && !loading && !error && (
+      {listing 
+      && !loading && !error && (
         <div>
           <Swiper navigation>
             {listing.imageUrls.map((url) => (
@@ -89,11 +91,11 @@ export default function Listing() {
             <p className="text-2xl font-semibold">
               {listing.name} - ${" "}
               {listing.offer
-                ? listing.discountPrice.toLocaleString("en-US")
-                : listing.regularPrice.toLocaleString("en-US")}
+                ? listing.discountPrice
+                : listing.regularPrice}
               {listing.type === "rent" && " / month"}
             </p>
-            <p className="flex items-center mt-6 gap-2 text-slate-600  text-sm">
+            <p className="flex items-center mt-6 gap-2 text-slate-600 text-sm">
               <FaMapMarkerAlt className="text-green-700" />
               {listing.address}
             </p>
@@ -108,11 +110,10 @@ export default function Listing() {
               )}
             </div>
             <p className="font-semibold text-black">
-              <span className="text-slate-800">
-                Description -{listing.description}
-              </span>
+              <span className="text-slate-800">Description -</span>{" "}
+              {listing.description}
             </p>
-            <ul className=" text-green-900 font-semibold text-sm items-center flex gap-4 flex-wrap sm:gap-6">
+            <ul className="text-green-900 font-semibold text-sm items-center flex gap-4 flex-wrap sm:gap-6">
               <li className="flex items-center gap-1 whitespace-nowra">
                 <FaBed className="text-lg" />
                 {listing.bedrooms > 1
@@ -139,10 +140,10 @@ export default function Listing() {
                 className="bg-slate-700 text-white rounded-lg uppercase p-3 hover:opacity-95 w-full"
                 onClick={() => setContact(true)}
               >
-                Contact landloard
+                Contact landlord
               </button>
             )}
-            {contact && <Contact listing={listing}/>}
+            {contact && <Contact listing={listing} />}
           </div>
         </div>
       )}

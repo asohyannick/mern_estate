@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   getStorage,
   uploadBytesResumable,
@@ -7,8 +7,10 @@ import {
 } from "firebase/storage";
 import { useSelector } from "react-redux";
 import { app } from "../firebase";
-import {useNavigate} from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 export default function CreateListing() {
+  const { currentUser } = useSelector((state) => state.user);
+  const navigate = useNavigate();
   const [files, setFiles] = useState([]);
   const [imageUploadError, setImageUploadError] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -23,22 +25,23 @@ export default function CreateListing() {
     bedrooms: 1,
     bathrooms: 1,
     regularPrice: 50,
-    discountPrice:0,
+    discountPrice: 0,
     offer: false,
     parking: false,
     furnished: false,
   });
   console.log(formData);
-  const { currentUser } = useSelector((state) => state.user);
- const navigate = useNavigate();
   const handleImageSubmit = () => {
     if (files.length > 0 && files.length + formData.imageUrls.length < 7) {
       setUploading(true);
       setImageUploadError(false);
+
       const promises = [];
+
       for (let i = 0; i < files.length; i++) {
         promises.push(storeImage(files[i]));
       }
+
       Promise.all(promises)
         .then((urls) => {
           setFormData({
@@ -46,7 +49,7 @@ export default function CreateListing() {
             imageUrls: formData.imageUrls.concat(urls),
           });
           setImageUploadError(false);
-          setUploading(false);
+          // setUploading(false);
         })
         .catch((err) => {
           setImageUploadError("Image upload failed (2 mb max per image)");
@@ -134,7 +137,7 @@ export default function CreateListing() {
       if (formData.imageUrls.length < 1)
         return setError("You must upload at least one image");
       if (+formData.regularPrice < +formData.discountPrice)
-        return setError("Discounted price must be lower than regular price");
+        return setError("Discount price must be lower than regular price");
       setLoading(true);
       setError(false);
       const res = await fetch("/api/listing/create", {
@@ -151,7 +154,7 @@ export default function CreateListing() {
         setError(data.message);
         return;
       }
-      navigate(`/listing/${data._id}`)
+      navigate(`/listing/${data._id}`);
     } catch (error) {
       setError(error.message);
       setLoading(false);
@@ -267,7 +270,9 @@ export default function CreateListing() {
               />
               <div className="flex flex-col items-center">
                 <p>Regular price</p>
-                <span className="text-xs">($ / month)</span>
+                {formData.type === "rent" && (
+                  <span className="text-xs">($ / month)</span>
+                )}
               </div>
             </div>
             {formData.offer && (
@@ -283,7 +288,10 @@ export default function CreateListing() {
                 />
                 <div className="flex flex-col items-center">
                   <p>Discounted price</p>
-                  <span className="text-xs">($ / month)</span>
+                  
+                  {formData.type === 'rent' && (
+                    <span className="text-xs">($ / month)</span>
+                  )}
                 </div>
               </div>
             )}
@@ -339,7 +347,7 @@ export default function CreateListing() {
             ))}
           <button
             className="p-3 bg-slate-700 text-white rounded-lg uppercase hover:opacity-95 disabled:opacity-80"
-            disabled={loading || uploading}
+            disabled={loading}
           >
             {loading ? "Creating..." : "Create Listing"}
           </button>

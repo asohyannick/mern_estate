@@ -18,7 +18,6 @@ export default function Search() {
   const [listings, setListings] = useState([]);
   const [showMore, setShowMore] = useState(false);
   const [errorListing, setErrorListing] = useState(false);
-  console.log(listings);
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search);
     const searchTermFromUrl = urlParams.get("searchTerm");
@@ -52,17 +51,22 @@ export default function Search() {
     const fetchListings = async () => {
       setLoading(true);
       setErrorListing(false);
+      setShowMore(false);
       const searchQuery = urlParams.toString();
-      const res = await fetch(`/api/listing/getListings/${searchQuery}`);
+      const res = await fetch(`/api/listing/getListings?${searchQuery}`);
       const data = await res.json();
+      if (data.length > 8) {
+        setShowMore(true);
+      } else {
+        setShowMore(false);
+      }
       if (data.success === false) {
         setErrorListing(true);
         setListings(false);
-      } else {
-        setListings(data);
-        setErrorListing(false);
-        setLoading(false);
       }
+      setListings(data);
+      setErrorListing(false);
+      setLoading(false);
     };
 
     fetchListings();
@@ -114,6 +118,20 @@ export default function Search() {
     urlParams.set("order", sidebardata.order);
     const searchQuery = urlParams.toString();
     navigate(`/search?${searchQuery}`);
+  };
+
+  const onShowMoreClick = async () => {
+    const numberOfListings = listings.length;
+    const startIndex = numberOfListings;
+    const urlParams = new URLSearchParams(location.search);
+    urlParams.set("startIndex", startIndex);
+    const searchQuery = urlParams.toString();
+    const res = await fetch(`/api/listing/getListings?${searchQuery}`);
+    const data = await res.json();
+    if (data.length < 9) {
+      setShowMore(false);
+    }
+    setListings([...listings, ...data]);
   };
 
   return (
@@ -208,7 +226,7 @@ export default function Search() {
               className="border rounded-lg p-3"
             >
               <option value="regularPrice_desc">Price high to low</option>
-              <option value="regularPrice_asc">Price low to hight</option>
+              <option value="regularPrice_asc">Price low to high</option>
               <option value="createdAt_desc">Latest</option>
               <option value="createdAt_asc">Oldest</option>
             </select>
@@ -237,6 +255,14 @@ export default function Search() {
             listings.map((listing) => (
               <ListingItem key={listing._id} listing={listing} />
             ))}
+          {showMore && (
+            <button
+              onClick={onShowMoreClick}
+              className="text-green-700 hover:underline p-7 text-center w-full"
+            >
+              Show more
+            </button>
+          )}
         </div>
       </div>
     </div>

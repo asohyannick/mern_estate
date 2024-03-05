@@ -1,7 +1,8 @@
 import Listing from "../models/listing.model.js";
 import { StatusCodes } from "http-status-codes";
 import { errorHandler } from "../utils/error.js";
-export const createListing = async (req, res, next) => {
+
+const createListing = async (req, res, next) => {
   try {
     const listing = await Listing.create(req.body);
     return res.status(StatusCodes.CREATED).json(listing);
@@ -9,8 +10,7 @@ export const createListing = async (req, res, next) => {
     next(error);
   }
 };
-
-export const deleteListing = async (req, res, next) => {
+ const deleteListing = async (req, res, next) => {
   const listing = await Listing.findById(req.params.id);
   if (!listing) {
     return next(errorHandler(StatusCodes.NOT_FOUND, "Listing not found!"));
@@ -30,8 +30,7 @@ export const deleteListing = async (req, res, next) => {
     next(error);
   }
 };
-
-export const updateListing = async (req, res, next) => {
+ const updateListing = async (req, res, next) => {
   const listing = await Listing.findById(req.params.id);
   if (!listing) {
     return next(errorHandler(StatusCodes.NOT_FOUND, "Listing not found!"));
@@ -55,8 +54,7 @@ export const updateListing = async (req, res, next) => {
     next(error);
   }
 };
-
-export const getListing = async (req, res, next) => {
+ const getListing = async (req, res, next) => {
   try {
     const listing = await Listing.findById(req.params.id);
     if (!listing) {
@@ -68,7 +66,7 @@ export const getListing = async (req, res, next) => {
   }
 };
 
-export const getListings = async (req, res, next) => {
+const getListings = async (req, res, next) => {
   try {
     const limit = parseInt(req.query.limit) || 9;
     const startIndex = parseInt(req.query.startIndex) || 0;
@@ -97,8 +95,11 @@ export const getListings = async (req, res, next) => {
       type = { $in: ["sale", "rent"] };
     }
     const searchTerm = req.query.searchTerm || "";
+
     const sort = req.query.sort || "createdAt";
+
     const order = req.query.order || "desc";
+    
     const listings = await Listing.find({
       name: { $regex: searchTerm, $options: "i" },
       offer,
@@ -114,3 +115,10 @@ export const getListings = async (req, res, next) => {
     next(error);
   }
 };
+export default {
+  createListing,
+  getListing,
+  updateListing,
+  deleteListing,
+  getListings
+}

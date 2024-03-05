@@ -1,10 +1,9 @@
 import User from "../models/user.model.js";
-import jwt from "jsonwebtoken";
 import { errorHandler } from "../utils/error.js";
 import { StatusCodes } from "http-status-codes";
 import bcryptjs from "bcryptjs";
 import Listing from "../models/listing.model.js";
-export const updateUser = async (req, res, next) => {
+const updateUser = async (req, res, next) => {
   if (req.user.id !== req.params.id) {
     return next(
       errorHandler(
@@ -35,8 +34,7 @@ export const updateUser = async (req, res, next) => {
     next(error);
   }
 };
-
-export const deleteUser = async (req, res, next) => {
+const deleteUser = async (req, res, next) => {
   if (req.user.id !== req.params.id) {
     return next(
       errorHandler(
@@ -47,13 +45,15 @@ export const deleteUser = async (req, res, next) => {
   }
   try {
     await User.findByIdAndDelete(req.params.id);
-    res.status(StatusCodes.OK).json("User has been deleted");
+    res
+      .clearCookie("access_token")
+      .status(StatusCodes.OK)
+      .json("User has been deleted");
   } catch (error) {
     next(error);
   }
 };
-
-export const getUserListings = async (req, res, next) => {
+const getUserListings = async (req, res, next) => {
   if (req.user.id === req.params.id) {
     try {
       const listings = await Listing.find({ userRef: req.params.id });
@@ -70,8 +70,7 @@ export const getUserListings = async (req, res, next) => {
     );
   }
 };
-
-export const getUser = async (req, res, next) => {
+const getUser = async (req, res, next) => {
   try {
     const user = await User.findById(req.params.id);
     if (!user) {
@@ -83,3 +82,10 @@ export const getUser = async (req, res, next) => {
     next(error);
   }
 };
+
+export default {
+  updateUser,
+  deleteUser,
+  getUserListings,
+  getUser
+}

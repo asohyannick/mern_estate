@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import {
   Home,
   SignIn,
@@ -20,8 +20,10 @@ function App() {
         <Route path="/sign-in" element={<SignIn />} />
         <Route path="/sign-up" element={<SignUp />} />
         <Route path="/about" element={<About />} />
-        <Route path="/listing/:listingId" element={<Listing />}/>
         <Route path="/search" element={<Search/>}/>
+        <Route path="/listing/:listingId" element={<Listing />}/>
+        <Route path="*" element={<Navigate to='/'/>}/>
+        
         <Route element={<PrivateRoute />}>
           <Route path="/profile" element={<Profile />} />
           <Route path="/create-listing" element={<CreateListing />}/>
@@ -30,6 +32,7 @@ function App() {
             element={<UpdateListing />}
           />
         </Route>
+
       </Routes>
     </BrowserRouter>
   );

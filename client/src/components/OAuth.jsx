@@ -6,17 +6,17 @@ import { useNavigate } from "react-router-dom";
 export default function OAuth() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const auth = getAuth(app)
+  const auth = getAuth(app);
   const handleGoogleClick = async () => {
     const provider = new GoogleAuthProvider();
-    provider.setCustomParameters({prompt: 'select_account'});
+    provider.setCustomParameters({ prompt: "select_account" });
     try {
       const result = await signInWithPopup(auth, provider);
 
-      const res = await fetch('/api/auth/google', {
-        method: 'POST',
+      const res = await fetch("/api/auth/google", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           name: result.user.displayName,
@@ -25,10 +25,8 @@ export default function OAuth() {
         }),
       });
       const data = await res.json();
-      if(res.ok) {
-        dispatch(signInSuccess(data));
-        navigate('/');
-      }
+      dispatch(signInSuccess(data));
+      navigate("/");
     } catch (error) {
       console.log(error);
     }

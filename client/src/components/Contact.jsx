@@ -1,9 +1,12 @@
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 export default function Contact({ listing }) {
   const [landlord, setLandlord] = useState(null);
-  const [message, setMessage] = useState("");
-  React.useEffect(() => {
+  const [message, setMessage] = useState(" ");
+  const onChange = (e) => {
+    setMessage(e.target.value);
+  };
+  useEffect(() => {
     const fetchLandLord = async () => {
       try {
         const res = await fetch(`/api/user/${listing.userRef}`);
@@ -15,10 +18,6 @@ export default function Contact({ listing }) {
     };
     fetchLandLord();
   }, [listing.userRef]);
-
-  const onChange = (e) => {
-    setMessage(e.target.value);
-  };
   return (
     <>
       {landlord && (

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   getStorage,
   uploadBytesResumable,
@@ -7,8 +7,8 @@ import {
 } from "firebase/storage";
 import { useSelector } from "react-redux";
 import { app } from "../firebase";
-import { useNavigate } from "react-router-dom";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+
 export default function UpdateListing() {
   const [files, setFiles] = useState([]);
   const [imageUploadError, setImageUploadError] = useState(false);
@@ -30,23 +30,23 @@ export default function UpdateListing() {
     furnished: false,
   });
   const params = useParams();
-  React.useEffect(() => {
-    const fetchListing = async() => {
+  useEffect(() => {
+    const fetchListing = async () => {
       const listingId = params.listingId;
       const res = await fetch(`/api/listing/getListing/${listingId}`);
       const data = await res.json();
-      if(data.success === false) {
+      if (data.success === false) {
         setError(data.message);
         return;
       }
       setFormData(data);
-    }
+    };
     fetchListing();
-  }, [])
-  
-  
+  }, []);
+
   const { currentUser } = useSelector((state) => state.user);
   const navigate = useNavigate();
+
   const handleImageSubmit = () => {
     if (files.length > 0 && files.length + formData.imageUrls.length < 7) {
       setUploading(true);
@@ -274,6 +274,18 @@ export default function UpdateListing() {
             <div className="flex items-center gap-2">
               <input
                 type="number"
+                id="bathrooms"
+                min="1"
+                max="10"
+                className="p-3 border border-gray-300  rounded-lg"
+                onChange={handleChange}
+                value={formData.bathrooms}
+              />
+              <p>Baths</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <input
+                type="number"
                 id="regularPrice"
                 min="50"
                 max="1000000"
@@ -283,7 +295,9 @@ export default function UpdateListing() {
               />
               <div className="flex flex-col items-center">
                 <p>Regular price</p>
-                <span className="text-xs">($ / month)</span>
+                {formData.type === "rent" && (
+                  <span className="text-xs">($ / month)</span>
+                )}
               </div>
             </div>
             {formData.offer && (
@@ -299,7 +313,9 @@ export default function UpdateListing() {
                 />
                 <div className="flex flex-col items-center">
                   <p>Discounted price</p>
-                  <span className="text-xs">($ / month)</span>
+                  {formData.type === "rent" && (
+                    <span className="text-xs">($ / month)</span>
+                  )}
                 </div>
               </div>
             )}
@@ -359,7 +375,7 @@ export default function UpdateListing() {
           >
             {loading ? "Updating..." : "Update Listing"}
           </button>
-          {error && <p className="text-red-500 text-sm">{error}</p>}
+          {error && <p className="text-red-700 text-sm">{error}</p>}
         </div>
       </form>
     </main>

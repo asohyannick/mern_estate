@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { Modal, Button } from "flowbite-react";
 import { HiOutlineExclamationCircle } from "react-icons/hi";
@@ -38,10 +38,9 @@ export default function Profile() {
   const [openModal, setOpenModal] = useState(false);
   const [showListingsError, setShowListingsError] = useState(false);
   const [userListings, setUserListings] = useState([]);
-  const [showUserDeleteListingError, setShowUserDeleteListingError] =
-    useState(false);
+  const [showUserDeleteListingError, setShowUserDeleteListingError] = useState(false);
   const dispatch = useDispatch();
-  React.useEffect(() => {
+  useEffect(() => {
     if (file) {
       handleFileUpload(file);
     }
@@ -231,7 +230,7 @@ export default function Profile() {
         />
         <button
           disabled={loading}
-          className="bg-slate-700 uppercase p-3 hover:opacity-95 rounded-lg disabled:opacity-80"
+          className="bg-slate-700 text-white uppercase p-3 hover:opacity-95 rounded-lg disabled:opacity-80"
         >
           {loading ? "Loading" : "Update"}
         </button>
@@ -293,6 +292,7 @@ export default function Profile() {
         className="bg-green-700 text-white w-full mt-5"
         color="success"
         onClick={handleShowListing}
+        disabled={loading}
       >
         Show Listing
       </Button>

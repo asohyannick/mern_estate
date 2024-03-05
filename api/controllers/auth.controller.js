@@ -3,9 +3,8 @@ import { StatusCodes } from "http-status-codes";
 import { errorHandler } from "../utils/error.js";
 import bcryptjs from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { json } from "express";
 
-export const signup = async (req, res, next) => {
+const signup = async (req, res, next) => {
   const { username, email, password } = req.body;
   const hashedPaasword = bcryptjs.hashSync(password, 10);
   const newUser = new User({ username, email, password: hashedPaasword });
@@ -17,7 +16,7 @@ export const signup = async (req, res, next) => {
   }
 };
 
-export const signin = async (req, res, next) => {
+const signin = async (req, res, next) => {
   const { email, password } = req.body;
   try {
     const validUser = await User.findOne({ email });
@@ -28,9 +27,7 @@ export const signin = async (req, res, next) => {
     if (!validPassword) {
       return next(errorHandler(StatusCodes.UNAUTHORIZED, "Wrong credentials"));
     }
-    const token = jwt.sign({ id: validUser._id }, process.env.JWT_SECRET, {
-      expiresIn: "1d",
-    });
+    const token = jwt.sign({ id: validUser._id }, process.env.JWT_SECRET);
     const { password: pass, ...rest } = validUser._doc;
     res
       .cookie("access_token", token, { httpOnly: true })
@@ -41,7 +38,7 @@ export const signin = async (req, res, next) => {
   }
 };
 
-export const google = async (req, res, next) => {
+const google = async (req, res, next) => {
   try {
     const user = await User.findOne({ email: req.body.email });
     if (user) {
@@ -58,7 +55,7 @@ export const google = async (req, res, next) => {
       const hashedPassword = bcryptjs.hashSync(generatedPassword, 10);
       const newUser = new User({
         username:
-          req.body.name.split(" ").join("").toLowerCase() +
+          req.body.name.split(' ').join('').toLowerCase() +
           Math.random().toString(36).slice(-4),
         email: req.body.email,
         password: hashedPassword,
@@ -77,11 +74,18 @@ export const google = async (req, res, next) => {
   }
 };
 
-export const signout  = async(req, res, next) => {
+const signout  = async(req, res, next) => {
   try {
     await res.clearCookie('access_token');
     res.status(StatusCodes.OK).json('User has been logged out successfully!')
   } catch(error) {
     next(error);
   }
+}
+
+export default {
+  signup,
+  signin,
+  google,
+  signout
 }

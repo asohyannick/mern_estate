@@ -10,17 +10,22 @@ import OAuth from "../components/OAuth";
 export default function SignIn() {
   const [formData, setFormData] = React.useState({});
   const { error, loading } = useSelector((state) => state.user);
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value.trim() });
   };
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!formData.email || !formData.password) {
       dispatch(signInFailure("Please provide all required fields!"));
       return;
     }
+
     try {
       dispatch(signInStart());
       const res = await fetch("/api/auth/signin", {
@@ -29,10 +34,15 @@ export default function SignIn() {
         body: JSON.stringify(formData),
       });
       const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.message);
+      if (data.success === false) {
+        dispatch(signInFailure(data.message));
+        return;
+      } else {
+        dispatch(signInSuccess(data));
       }
-      dispatch(signInSuccess(data));
+      // if (!res.ok) {
+      //   throw new Error(data.message);
+      // }
       navigate("/");
     } catch (error) {
       dispatch(signInFailure(error.message));
@@ -63,15 +73,15 @@ export default function SignIn() {
         >
           {loading ? "Loading..." : "Sign In"}
         </button>
+        <OAuth />
       </form>
-      <OAuth/>
       <div className="flex gap-2 mt-5">
         <p>Don't have an account?</p>
         <Link to={"/sign-up"}>
           <span className="text-blue-700">Sign Up</span>
         </Link>
       </div>
-      {error && <p className="text-red-700">{error}</p>}
+      {error && <p className="text-red-700 mt-5">{error}</p>}
     </div>
   );
 }
